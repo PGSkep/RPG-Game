@@ -3,6 +3,7 @@
 #include "CommandBuffer.h"
 #include "Console.h"
 #include "Renderer.h"
+#include "Timer.h"
 
 #include "Input.h"
 
@@ -15,17 +16,28 @@ int main()
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	_CrtSetBreakAlloc(-1);
 
+	Timer timer;
+	timer.SetResolution(Timer::RESOLUTION_NANOSECONDS);
+
 	Input::Init();
 	Input::Reset();
 
 	Renderer renderer;
 	renderer.Init();
 	
+	timer.Play();
+	double currentTime = timer.GetTime();
+	double lastTime = currentTime;
 	while (Input::GetState(Input::ESC) != Input::PRESSED)
 	{
+		currentTime = timer.GetTime();
+
 		Input::Update();
 
-		renderer.Update();
+		double deltaTime = currentTime - lastTime;
+		renderer.Update((float)deltaTime);
+
+		lastTime = currentTime;
 	}
 	
 	renderer.ShutDown();
